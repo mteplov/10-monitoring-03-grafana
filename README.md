@@ -1,56 +1,97 @@
-# Monitoring Stack test для правки потом под структуру домашнего задания 
+# Домашнее задание к занятию 14 «Средство визуализации Grafana» Теплов Михаил
 
-Стек мониторинга на базе Prometheus, Node Exporter и Grafana.
+## Задание повышенной сложности
 
-## Состав
+**При решении задания 1** не используйте директорию [help](./help) для сборки проекта. Самостоятельно разверните grafana, где в роли источника данных будет выступать prometheus, а сборщиком данных будет node-exporter:
 
-- Prometheus
-- Node Exporter
-- Grafana
+- grafana;
+- prometheus-server;
+- prometheus node-exporter.
 
-## Запуск
+За дополнительными материалами можете обратиться в официальную документацию grafana и prometheus.
 
-```bash
-docker compose up -d
+В решении к домашнему заданию также приведите все конфигурации, скрипты, манифесты, которые вы 
+использовали в процессе решения задания.
+
+**При решении задания 3** вы должны самостоятельно завести удобный для вас канал нотификации, например, Telegram или email, и отправить туда тестовые события.
+
+В решении приведите скриншоты тестовых событий из каналов нотификаций.
+
+## Обязательные задания
+
+### Задание 1
+
+1. Используя директорию [help](./help) внутри этого домашнего задания, запустите связку prometheus-grafana.
+1. Зайдите в веб-интерфейс grafana, используя авторизационные данные, указанные в манифесте docker-compose.
+1. Подключите поднятый вами prometheus, как источник данных.
+1. Решение домашнего задания — скриншот веб-интерфейса grafana со списком подключенных Datasource.
+![1](./img/1.png)
+![2](./img/2.png)
+![3](./img/3.png)
+![4](./img/4.png)
+![5](./img/5.png)
+## Задание 2
+
+Изучите самостоятельно ресурсы:
+
+1. [PromQL tutorial for beginners and humans](https://valyala.medium.com/promql-tutorial-for-beginners-9ab455142085).
+1. [Understanding Machine CPU usage](https://www.robustperception.io/understanding-machine-cpu-usage).
+1. [Introduction to PromQL, the Prometheus query language](https://grafana.com/blog/2020/02/04/introduction-to-promql-the-prometheus-query-language/).
+
+Создайте Dashboard и в ней создайте Panels:
+
+- утилизация CPU для nodeexporter (в процентах, 100-idle);
+- CPULA 1/5/15;
+- количество свободной оперативной памяти;
+- количество места на файловой системе.
+
+  ### CPU Utilization (%)
+Показывает процент загрузки процессора по формуле 100 - idle.
+```promql
+100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)
+```
+### CPU Load Average (1 минута)
+
+```promql
+node_load1
+```
+### CPU Load Average (5 минут)
+
+```promql
+node_load5
+```
+### CPU Load Average (15 минут)
+```promql
+node_load15
+```
+### Свободная оперативная память (GB)
+```promql
+node_memory_MemAvailable_bytes / 1024 / 1024 / 1024
+```
+### Свободное место на файловой системе (GB)
+```promql
+sum(node_filesystem_avail_bytes{fstype!="tmpfs"}) / 1024 / 1024 / 1024
 ```
 
-## Проверка
+  ![5](./img/6.png)
 
-Grafana:
+Для решения этого задания приведите promql-запросы для выдачи этих метрик, а также скриншот получившейся Dashboard.
 
-http://<SERVER_IP>:3000
+## Задание 3
 
-Prometheus:
+1. Создайте для каждой Dashboard подходящее правило alert — можно обратиться к первой лекции в блоке «Мониторинг».
+1. В качестве решения задания приведите скриншот вашей итоговой Dashboard.
+![7](./img/7.png)
+![8](./img/8.png)
+## Задание 4
 
-http://<SERVER_IP>:9090
+1. Сохраните ваш Dashboard.Для этого перейдите в настройки Dashboard, выберите в боковом меню «JSON MODEL». Далее скопируйте отображаемое json-содержимое в отдельный файл и сохраните его.
+1. В качестве решения задания приведите листинг этого файла.
+ [Листинг json](https://github.com/mteplov/10-monitoring-03-grafana/blob/master/dashboard-1781672790430.json)
+---
 
-Node Exporter:
+### Как оформить решение задания
 
-http://<SERVER_IP>:9100/metrics
+Выполненное домашнее задание пришлите в виде ссылки на .md-файл в вашем репозитории.
 
-## Авторизация Grafana
-
-Логин:
-
-admin
-
-Пароль:
-
-admin
-
-## Dashboard
-
-В репозитории присутствует экспортированный Dashboard:
-
-dashboard/node-exporter-dashboard.json
-
-## Alerting
-
-Настроены алерты:
-
-- High CPU Usage
-- High Load Average
-- Low Free Memory
-- Low Disk Space
-
-Уведомления отправляются в Telegram.
+---
